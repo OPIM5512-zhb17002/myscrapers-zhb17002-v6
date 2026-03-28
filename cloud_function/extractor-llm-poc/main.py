@@ -156,7 +156,8 @@ def _safe_int(x):
 # -------------------- VERTEX AI CALL --------------------
 def _vertex_extract_fields(raw_text: str) -> dict:
     """
-    Ask Gemini to return JSON with exactly: price, year, make, model,color,transmission,doors, mileage.
+    Ask Gemini to return JSON with exactly: price, year, make, model,color,horsepower,
+    title_status,fuel,drive,transmission,doors, VIN,mileage.
     """
     model = _get_vertex_model()
 
@@ -169,7 +170,12 @@ def _vertex_extract_fields(raw_text: str) -> dict:
             "make": {"type": "string", "nullable": True},
             "model": {"type": "string", "nullable": True},
             "color": {"type": "string", "nullable": True},
+            "fuel": {"type": "string", "nullable": True},
+            "drive": {"type": "string", "nullable": True},
+            "horsepower": {"type": "integer", "nullable": True},
             "transmission": {"type": "string", "nullable": True},
+            "title_status": {"type": "string", "nullable": True},
+            "VIN": {"type": "string", "nullable": True},
             "doors": {"type": "integer", "nullable": True},
             "mileage": {"type": "integer", "nullable": True},
         },
@@ -183,8 +189,13 @@ def _vertex_extract_fields(raw_text: str) -> dict:
         "If a value is not present, use null. "
         "Rules: integers for price/year/mileage; price in USD; mileage in miles; "
         "the transmission can be manual or automatic, or if not listed, write null."
+        "the drive can be 4wd,rwd or fwd,if not listed, write null."
         "the value for number of doors will be an integer, or if not listed, write null."
         "extract the color of the car, if not listed, write null"
+        "extract the title status of the car, if not listed, write null"
+        "extract the fuel type of the car, if not listed, write null"
+        "extract the VIN of the car, if not listed, write null"
+        "the value for horsepower will be an integer, or if not listed, write null."
         "do not infer values not explicitly present; do not add extra keys."
     )
 
@@ -229,6 +240,9 @@ def _vertex_extract_fields(raw_text: str) -> dict:
     parsed["year"] = _safe_int(parsed.get("year"))
     parsed["mileage"] = _safe_int(parsed.get("mileage"))
     parsed["doors"] = _safe_int(parsed.get("doors"))
+    parsed["horsepower"] = _safe_int(parsed.get("horsepower"))
+    parsed["title_status"] = _safe_int(parsed.get("title_status"))
+    parsed["VIN"] = _safe_int(parsed.get("VIN"))
     
     def _norm_str(s):
         if s is None: return None
@@ -238,6 +252,8 @@ def _vertex_extract_fields(raw_text: str) -> dict:
     parsed["make"] = _norm_str(parsed.get("make"))
     parsed["model"] = _norm_str(parsed.get("model"))
     parsed["color"] = _norm_str(parsed.get("color"))
+    parsed["drive"] = _norm_str(parsed.get("drive"))
+    parsed["fuel"] = _norm_str(parsed.get("fuel"))
     parsed["transmission"] = _norm_str(parsed.get("transmission"))
 
 
@@ -329,6 +345,11 @@ def llm_extract_http(request: Request):
                 "make": parsed.get("make"),
                 "model": parsed.get("model"),
                 "color": parsed.get("color"),
+                "VIN": parsed.get("VIN"),
+                "title_status": parsed.get("title_status"),
+                "drive": parsed.get("drive"),
+                "horsepower": parsed.get("horsepower"),
+                "fuel": parsed.get("fuel"),
                 "transmission": parsed.get("transmission"),
                 "mileage": parsed.get("mileage"),
                 "llm_provider": "vertex",
