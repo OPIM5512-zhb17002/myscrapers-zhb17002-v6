@@ -242,7 +242,7 @@ def _vertex_extract_fields(raw_text: str) -> dict:
     parsed["doors"] = _safe_int(parsed.get("doors"))
     parsed["horsepower"] = _safe_int(parsed.get("horsepower"))
     parsed["title status"] = _safe_int(parsed.get("title status"))
-    parsed["VIN"] = _safe_int(parsed.get("VIN"))
+    parsed["vin"] = _safe_int(parsed.get("vin"))
     
     def _norm_str(s):
         if s is None: return None
