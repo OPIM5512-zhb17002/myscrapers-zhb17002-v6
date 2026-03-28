@@ -156,7 +156,7 @@ def _safe_int(x):
 # -------------------- VERTEX AI CALL --------------------
 def _vertex_extract_fields(raw_text: str) -> dict:
     """
-    Ask Gemini to return JSON with exactly: price, year, make, model, mileage.
+    Ask Gemini to return JSON with exactly: price, year, make, model,color,transmission,doors, mileage.
     """
     model = _get_vertex_model()
 
@@ -168,6 +168,9 @@ def _vertex_extract_fields(raw_text: str) -> dict:
             "year": {"type": "integer", "nullable": True},
             "make": {"type": "string", "nullable": True},
             "model": {"type": "string", "nullable": True},
+            "color": {"type": "string", "nullable": True},
+            "transmission": {"type": "string", "nullable": True},
+            "doors": {"type": "integer", "nullable": True},
             "mileage": {"type": "integer", "nullable": True},
         },
         "required": ["price", "year", "make", "model", "mileage"]
@@ -179,6 +182,9 @@ def _vertex_extract_fields(raw_text: str) -> dict:
         "Return a strict JSON object that conforms to the provided schema. "
         "If a value is not present, use null. "
         "Rules: integers for price/year/mileage; price in USD; mileage in miles; "
+        "the transmission can be manual or automatic, or if not listed, write null."
+        "the value for number of doors will be an integer, or if not listed, write null."
+        "extract the color of the car, if not listed, write null"
         "do not infer values not explicitly present; do not add extra keys."
     )
 
@@ -222,6 +228,7 @@ def _vertex_extract_fields(raw_text: str) -> dict:
     parsed["price"] = _safe_int(parsed.get("price"))
     parsed["year"] = _safe_int(parsed.get("year"))
     parsed["mileage"] = _safe_int(parsed.get("mileage"))
+    parsed["doors"] = _safe_int(parsed.get("doors"))
     
     def _norm_str(s):
         if s is None: return None
@@ -230,6 +237,9 @@ def _vertex_extract_fields(raw_text: str) -> dict:
 
     parsed["make"] = _norm_str(parsed.get("make"))
     parsed["model"] = _norm_str(parsed.get("model"))
+    parsed["color"] = _norm_str(parsed.get("color"))
+    parsed["transmission"] = _norm_str(parsed.get("transmission"))
+
 
     return parsed
 
@@ -314,9 +324,12 @@ def llm_extract_http(request: Request):
                 "scraped_at": base_rec.get("scraped_at", structured_iso),
                 "source_txt": source_txt_key,
                 "price": parsed.get("price"),
+                "doors": parsed.get("doors"),
                 "year": parsed.get("year"),
                 "make": parsed.get("make"),
                 "model": parsed.get("model"),
+                "color": parsed.get("color"),
+                "transmission": parsed.get("transmission"),
                 "mileage": parsed.get("mileage"),
                 "llm_provider": "vertex",
                 "llm_model": LLM_MODEL,
