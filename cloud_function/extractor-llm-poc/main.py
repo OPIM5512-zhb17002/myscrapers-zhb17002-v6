@@ -157,7 +157,7 @@ def _safe_int(x):
 def _vertex_extract_fields(raw_text: str) -> dict:
     """
     Ask Gemini to return JSON with exactly: price, year, make, model,color,horsepower,
-    title status,fuel,drive,transmission,doors, vin ,mileage.
+    title status,fuel,drive,transmission,doors, vin ,mileage,cylinders, type of the car.
     """
     model = _get_vertex_model()
 
@@ -176,7 +176,9 @@ def _vertex_extract_fields(raw_text: str) -> dict:
             "transmission": {"type": "string", "nullable": True},
             "title status": {"type": "string", "nullable": True},
             "VIN": {"type": "string", "nullable": True},
+            "type of the car":{"type": "string", "nullable": True},
             "doors": {"type": "integer", "nullable": True},
+            "cylinders": {"type": "integer", "nullable": True},
             "mileage": {"type": "integer", "nullable": True},
         },
         "required": ["price", "year", "make", "model", "mileage"]
@@ -191,11 +193,13 @@ def _vertex_extract_fields(raw_text: str) -> dict:
         "the transmission can be manual or automatic, or if not listed, write null."
         "the drive can be 4wd,rwd or fwd,if not listed, write null."
         "the value for number of doors will be an integer, or if not listed, write null."
+        "the value for number of cylinders will be an integer, or if not listed, write null."
         "extract the color of the car, if not listed, write null"
-        "the title status can be clean, salvage, rebuilt, lien,missing, parts only, or flood, if not listed, write null"
+        "the title status of the car can be clean, salvage, rebuilt, lien,missing, parts only, or flood, if not listed, write null"
         "extract the fuel type of the car,the feul type can be Gas,Diesel,Hybrid,Electric,Plug-in Hybrid, Flex Fuel or CNG, if not listed, write null"
-        "extract the VIN of the car. A VIN has exactly 17 characters. It uses only letters A-Z and digits 0-9. It does not contain I, O, or Q. If not listed, write null"
+        "the VIN of the car has exactly 17 characters. It uses only letters A-Z and digits 0-9. It does not contain I, O, or Q. If not listed, write null"
         "the value for horsepower will be an integer, or if not listed, write null."
+        "the type of the car can be Sedan, SUV, Coupe, Hatchback, Wagon, Convertible, Pickup, Truck, Van or Minivan. If not listed, write null."
         "do not infer values not explicitly present; do not add extra keys."
     )
 
@@ -241,8 +245,7 @@ def _vertex_extract_fields(raw_text: str) -> dict:
     parsed["mileage"] = _safe_int(parsed.get("mileage"))
     parsed["doors"] = _safe_int(parsed.get("doors"))
     parsed["horsepower"] = _safe_int(parsed.get("horsepower"))
-    parsed["title status"] = _safe_int(parsed.get("title status"))
-    parsed["VIN"] = _safe_int(parsed.get("VIN"))
+    parsed["cylinders"] = _safe_int(parsed.get("cylinders"))
     
     def _norm_str(s):
         if s is None: return None
@@ -255,6 +258,9 @@ def _vertex_extract_fields(raw_text: str) -> dict:
     parsed["drive"] = _norm_str(parsed.get("drive"))
     parsed["fuel"] = _norm_str(parsed.get("fuel"))
     parsed["transmission"] = _norm_str(parsed.get("transmission"))
+    parsed["title status"] = _norm_str(parsed.get("title status"))
+    parsed["VIN"] = _norm_str(parsed.get("VIN"))
+    parsed["type of the car"] = _norm_str(parsed.get("type of the car"))
 
 
     return parsed
@@ -343,9 +349,11 @@ def llm_extract_http(request: Request):
                 "doors": parsed.get("doors"),
                 "year": parsed.get("year"),
                 "make": parsed.get("make"),
+                "type of the car": parsed.get("type of the car"),
                 "model": parsed.get("model"),
                 "color": parsed.get("color"),
                 "VIN": parsed.get("VIN"),
+                "cylinders": parsed.get("cylinders"),
                 "title status": parsed.get("title status"),
                 "drive": parsed.get("drive"),
                 "horsepower": parsed.get("horsepower"),
