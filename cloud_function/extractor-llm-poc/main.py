@@ -175,7 +175,7 @@ def _vertex_extract_fields(raw_text: str) -> dict:
             "horsepower": {"type": "integer", "nullable": True},
             "transmission": {"type": "string", "nullable": True},
             "title status": {"type": "string", "nullable": True},
-            "vin": {"type": "string", "nullable": True},
+            "VIN": {"type": "string", "nullable": True},
             "doors": {"type": "integer", "nullable": True},
             "mileage": {"type": "integer", "nullable": True},
         },
@@ -192,9 +192,10 @@ def _vertex_extract_fields(raw_text: str) -> dict:
         "the drive can be 4wd,rwd or fwd,if not listed, write null."
         "the value for number of doors will be an integer, or if not listed, write null."
         "extract the color of the car, if not listed, write null"
-        "extract the title status of the car, if not listed, write null"
+        """extract the title status of the car, title status can be clean, salvage, rebuilt, lien,
+        "missing, parts only, or flood, if not listed, write null"""
         "extract the fuel type of the car, if not listed, write null"
-        "extract the vin of the car, if not listed, write null"
+        "extract the VIN of the car. A VIN has exactly 17 characters. If not listed, write null"
         "the value for horsepower will be an integer, or if not listed, write null."
         "do not infer values not explicitly present; do not add extra keys."
     )
@@ -242,7 +243,7 @@ def _vertex_extract_fields(raw_text: str) -> dict:
     parsed["doors"] = _safe_int(parsed.get("doors"))
     parsed["horsepower"] = _safe_int(parsed.get("horsepower"))
     parsed["title status"] = _safe_int(parsed.get("title status"))
-    parsed["vin"] = _safe_int(parsed.get("vin"))
+    parsed["VIN"] = _safe_int(parsed.get("VIN"))
     
     def _norm_str(s):
         if s is None: return None
@@ -345,7 +346,7 @@ def llm_extract_http(request: Request):
                 "make": parsed.get("make"),
                 "model": parsed.get("model"),
                 "color": parsed.get("color"),
-                "vin": parsed.get("vin"),
+                "VIN": parsed.get("VIN"),
                 "title status": parsed.get("title status"),
                 "drive": parsed.get("drive"),
                 "horsepower": parsed.get("horsepower"),
