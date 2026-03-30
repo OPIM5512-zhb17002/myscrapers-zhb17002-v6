@@ -195,7 +195,9 @@ def _vertex_extract_fields(raw_text: str) -> dict:
         """extract the title status of the car, title status can be clean, salvage, rebuilt, lien,
         "missing, parts only, or flood, if not listed, write null"""
         "extract the fuel type of the car, if not listed, write null"
-        "extract the VIN of the car. A VIN has exactly 17 characters. If not listed, write null"
+        """extract the VIN of the car. A VIN has exactly 17 characters. 
+           It uses only letters A-Z and digits 0-9. It does not contain I, O, or Q.
+           If not listed, write null"""
         "the value for horsepower will be an integer, or if not listed, write null."
         "do not infer values not explicitly present; do not add extra keys."
     )
