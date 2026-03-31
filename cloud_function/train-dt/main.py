@@ -87,8 +87,9 @@ def run_once(dry_run: bool = False, max_depth: int = 12, min_samples_leaf: int =
 
     # --- Model: make, model, year_num, mileage_num -> price_num ---
     target = "price_num"
-    cat_cols = ["make", "model"]
-    num_cols = ["year_num", "mileage_num"]
+    train_df["fuel"] = train_df["fuel"].replace({"gas": "Gas"})
+    cat_cols = ["make", "model","drive","fuel"]
+    num_cols = ["year_num", "mileage_num","cylinders"]
     feats = cat_cols + num_cols
 
     pre = ColumnTransformer(
@@ -115,7 +116,7 @@ def run_once(dry_run: bool = False, max_depth: int = 12, min_samples_leaf: int =
         X_h = holdout_df[feats]
         y_hat = pipe.predict(X_h)
 
-        cols = ["post_id", "scraped_at", "make", "model", "year", "mileage", "price"]
+        cols = ["post_id", "scraped_at", "make", "model","drive","fuel", "year", "mileage","cylinders", "price"]
         preds_df = holdout_df[cols].copy()
         preds_df["actual_price"] = holdout_df["price_num"]       # cleaned numeric truth
         preds_df["pred_price"]   = np.round(y_hat, 2)
