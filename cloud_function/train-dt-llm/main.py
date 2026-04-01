@@ -2,6 +2,7 @@
 # HTTP entrypoint: train_dt_http
 
 import os, io, json, logging, traceback, re
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from google.cloud import storage
@@ -123,6 +124,7 @@ def run_once(dry_run: bool = False, max_depth: int = 12, min_samples_leaf: int =
     mae_today = None
     preds_df = pd.DataFrame()
     if not holdout_df.empty:
+        holdout_df ["fuel"] = holdout_df ["fuel"].replace({"gas": "Gas"})
         X_h = holdout_df[feats]
         y_hat = best_pipe.predict(X_h)
 
@@ -136,6 +138,57 @@ def run_once(dry_run: bool = False, max_depth: int = 12, min_samples_leaf: int =
             mask = y_true.notna()
             if mask.any():
                 mae_today = float(mean_absolute_error(y_true[mask], y_hat[mask]))
+                from sklearn.inspection import permutation_importance
+                clf=best_pipe
+                result=permutation_importance(clf,X_h[mask],y_true[mask],n_repeats=10,random_state=42)
+                perm_sorted_idx = result.importances_mean.argsort()
+
+                tree_importance_sorted_idx = np.argsort(clf.named_steps["model"].feature_importances_)
+                tree_indices = np.arange(0, len(clf.named_steps["model"].feature_importances_)) + 0.5
+
+                fig, ax1 = plt.subplots(1, 1, figsize=(6, 4))
+                ax1.boxplot(result.importances[perm_sorted_idx].T, vert=False,
+                          labels=X_h[mask].columns[perm_sorted_idx])
+                fig.suptitle('DTR Feature Importance', y=1.05)
+                fig.tight_layout()
+                plt.savefig(f"{OUTPUT_PREFIX}/{now_utc.strftime('%Y%m%d%H')}/DTR_Feature_Importance.png")
+                plt.show()
+                from pycebox.ice import ice, ice_plot
+                tmpdf = ice(data=train_df[feats],
+                            column="mileage_num", 
+                            predict=best_pipe.predict)
+                ice_plot(tmpdf, c="dimgray", linewidth=0.3,
+                            plot_pdp=True,
+                pdp_kwargs={"linewidth": 5, "color":"red"})
+                plt.title("PDP: mileage_num")
+                plt.ylabel("Predicted Price")
+                plt.xlabel("mileage_num");
+                plt.savefig(f"{OUTPUT_PREFIX}/{now_utc.strftime('%Y%m%d%H')}/PDP_mileage_num.png")
+                plt.show()  
+
+                tmpdf = ice(data=train_df[feats],
+                            column="year_num", 
+                            predict=best_pipe.predict)
+                ice_plot(tmpdf, c="dimgray", linewidth=0.3,
+                         plot_pdp=True,
+                pdp_kwargs={"linewidth": 5, "color":"red"})
+                plt.title("PDP: year_num")
+                plt.ylabel("Predicted Price")
+                plt.xlabel("year_num");
+                plt.savefig(f"{OUTPUT_PREFIX}/{now_utc.strftime('%Y%m%d%H')}/PDP_year_num.png")
+                plt.show() 
+
+                tmpdf = ice(data=train_df[feats],
+                            column="cylinders", 
+                            predict=best_pipe.predict)
+                ice_plot(tmpdf, c="dimgray", linewidth=0.3,
+                            plot_pdp=True,
+                pdp_kwargs={"linewidth": 5, "color":"red"})
+                plt.title("PDP: cylinders")
+                plt.ylabel("Predicted Price")
+                plt.xlabel("cylinders");
+                plt.savefig(f"{OUTPUT_PREFIX}/{now_utc.strftime('%Y%m%d%H')}/PDP_cylinders.png")
+                plt.show()
 
     # --- Output path: HOURLY folder structure ---
     now_utc = pd.Timestamp.utcnow().tz_convert("UTC")
