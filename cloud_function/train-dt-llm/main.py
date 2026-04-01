@@ -7,6 +7,7 @@ import pandas as pd
 from google.cloud import storage
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder
+from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
 from sklearn.impute import SimpleImputer
 from sklearn.tree import DecisionTreeRegressor
@@ -92,29 +93,38 @@ def run_once(dry_run: bool = False, max_depth: int = 12, min_samples_leaf: int =
     num_cols = ["year_num", "mileage_num","cylinders"]
     feats = cat_cols + num_cols
 
+    from sklearn.model_selection import KFold
+    from sklearn.model_selection import GridSearchCV
     pre = ColumnTransformer(
         transformers=[
-            ("num", SimpleImputer(strategy="median"), num_cols),
+            ("num",  Pipeline([
+                ("num_imp",SimpleImputer(strategy="median")),
+                ("scaler",StandardScaler())
+                ]),num_cols),
             ("cat", Pipeline([
                 ("imp", SimpleImputer(strategy="most_frequent")),
                 ("oh", OneHotEncoder(handle_unknown="ignore"))
-            ]), cat_cols),
-        ]
-    )
+            ]), cat_cols)
+        ])
 
-    model = DecisionTreeRegressor(max_depth=max_depth, min_samples_leaf=min_samples_leaf, random_state=42)
-    pipe = Pipeline([("pre", pre), ("model", model)])
-
-    X_train = train_df[feats]
-    y_train = train_df[target]
-    pipe.fit(X_train, y_train)
+    pipe = Pipeline([
+            ("pre", pre),
+            ("model", DecisionTreeRegressor(random_state=42))
+        ])
+    max_depth_values=np.array([2,4,6,8,10,12,14,16,18,20])
+    min_sample_leaf_values=np.array([5,10,15,20,25,30])
+    param_grid=dict(model__max_depth=max_depth_values,model__min_samples_leaf=min_sample_leaf_values)
+    kfold=KFold(n_splits=5,random_state=42,shuffle=True)
+    grid=GridSearchCV(estimator=pipe,param_grid=param_grid,scoring="neg_mean_absolute_error",cv=kfold)
+    grid_result = grid.fit(train_df[feats], train_df[target])
+    best_pipe = grid_result.best_estimator_
 
     # ---- Predict/evaluate on today's holdout (now includes actual price fields) ----
     mae_today = None
     preds_df = pd.DataFrame()
     if not holdout_df.empty:
         X_h = holdout_df[feats]
-        y_hat = pipe.predict(X_h)
+        y_hat = best_pipe.predict(X_h)
 
         cols = ["post_id", "scraped_at", "make", "model","drive","fuel", "year", "mileage","cylinders", "price"]
         preds_df = holdout_df[cols].copy()
