@@ -152,11 +152,16 @@ def run_once(dry_run: bool = False, max_depth: int = 12, min_samples_leaf: int =
                 fig.suptitle('DTR Feature Importance', y=1.05)
                 fig.tight_layout()
                 plt.show()
+
+                def pred_fn(x):
+                    x_df = pd.DataFrame(x, columns=feats)
+                    return best_pipe.predict(x_df)
+                
                 from pycebox.ice import ice, ice_plot
                 plt.figure()
                 tmpdf = ice(data=train_df[feats],
                             column="mileage_num", 
-                            predict=best_pipe.predict(pd.DataFrame(train_df[feats], columns=feats)))
+                            predict=pred_fn)
                 print(type(train_df))
                 print(type(train_df[feats]))
                 print(train_df[feats].columns)
@@ -172,7 +177,7 @@ def run_once(dry_run: bool = False, max_depth: int = 12, min_samples_leaf: int =
                 plt.figure()
                 tmpdf = ice(data=train_df[feats],
                             column="year_num", 
-                            predict=best_pipe.predict(pd.DataFrame(train_df[feats], columns=feats)))
+                            predict=pred_fn)
                 ice_plot(tmpdf, c="dimgray", linewidth=0.3,
                          plot_pdp=True,
                 pdp_kwargs={"linewidth": 5, "color":"red"})
@@ -186,7 +191,7 @@ def run_once(dry_run: bool = False, max_depth: int = 12, min_samples_leaf: int =
                 plt.figure()
                 tmpdf = ice(data=train_df[feats],
                             column="cylinders", 
-                            predict=best_pipe.predict(pd.DataFrame(train_df[feats], columns=feats)))
+                            predict=pred_fn)
                 ice_plot(tmpdf, c="dimgray", linewidth=0.3,
                             plot_pdp=True,
                 pdp_kwargs={"linewidth": 5, "color":"red"})
