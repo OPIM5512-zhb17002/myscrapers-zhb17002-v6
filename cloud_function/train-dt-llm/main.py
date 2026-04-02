@@ -152,7 +152,7 @@ def run_once(dry_run: bool = False, max_depth: int = 12, min_samples_leaf: int =
                 fig.suptitle('DTR Feature Importance', y=1.05)
                 fig.tight_layout()
                 plt.show()
-                '''from pycebox.ice import ice, ice_plot
+                from pycebox.ice import ice, ice_plot
                 plt.figure()
                 tmpdf = ice(data=train_df[feats],
                             column="mileage_num", 
@@ -192,7 +192,7 @@ def run_once(dry_run: bool = False, max_depth: int = 12, min_samples_leaf: int =
                 plt.xlabel("cylinders");
                 
                 fig4 = plt.gcf()
-                plt.show()'''
+                plt.show()
 
     # --- Output path: HOURLY folder structure ---
     now_utc = pd.Timestamp.utcnow().tz_convert("UTC")
