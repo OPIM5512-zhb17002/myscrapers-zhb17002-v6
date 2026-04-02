@@ -156,7 +156,7 @@ def run_once(dry_run: bool = False, max_depth: int = 12, min_samples_leaf: int =
                 plt.figure()
                 tmpdf = ice(data=train_df[feats],
                             column="mileage_num", 
-                            predict=best_pipe.predict)
+                            predict=best_pipe.predict(pd.DataFrame(train_df[feats], columns=feats)))
                 print(type(train_df))
                 print(type(train_df[feats]))
                 print(train_df[feats].columns)
@@ -172,7 +172,7 @@ def run_once(dry_run: bool = False, max_depth: int = 12, min_samples_leaf: int =
                 plt.figure()
                 tmpdf = ice(data=train_df[feats],
                             column="year_num", 
-                            predict=best_pipe.predict)
+                            predict=best_pipe.predict(pd.DataFrame(train_df[feats], columns=feats)))
                 ice_plot(tmpdf, c="dimgray", linewidth=0.3,
                          plot_pdp=True,
                 pdp_kwargs={"linewidth": 5, "color":"red"})
@@ -186,7 +186,7 @@ def run_once(dry_run: bool = False, max_depth: int = 12, min_samples_leaf: int =
                 plt.figure()
                 tmpdf = ice(data=train_df[feats],
                             column="cylinders", 
-                            predict=best_pipe.predict)
+                            predict=best_pipe.predict(pd.DataFrame(train_df[feats], columns=feats)))
                 ice_plot(tmpdf, c="dimgray", linewidth=0.3,
                             plot_pdp=True,
                 pdp_kwargs={"linewidth": 5, "color":"red"})
