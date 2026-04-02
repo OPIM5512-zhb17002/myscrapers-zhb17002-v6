@@ -138,7 +138,7 @@ def run_once(dry_run: bool = False, max_depth: int = 12, min_samples_leaf: int =
             mask = y_true.notna()
             if mask.any():
                 mae_today = float(mean_absolute_error(y_true[mask], y_hat[mask]))
-                from sklearn.inspection import permutation_importance
+                '''from sklearn.inspection import permutation_importance
                 clf=best_pipe
                 result=permutation_importance(clf,X_h[mask],y_true[mask],n_repeats=10,random_state=42)
                 perm_sorted_idx = result.importances_mean.argsort()
@@ -192,15 +192,15 @@ def run_once(dry_run: bool = False, max_depth: int = 12, min_samples_leaf: int =
                 plt.xlabel("cylinders");
                 
                 fig4 = plt.gcf()
-                plt.show()
+                plt.show()'''
 
     # --- Output path: HOURLY folder structure ---
     now_utc = pd.Timestamp.utcnow().tz_convert("UTC")
     out_key = f"{OUTPUT_PREFIX}/{now_utc.strftime('%Y%m%d%H')}/preds_llm.csv"
-    fig.savefig(f"{OUTPUT_PREFIX}/{now_utc.strftime('%Y%m%d%H')}/DTR_Feature_Importance.png")
+    '''fig.savefig(f"{OUTPUT_PREFIX}/{now_utc.strftime('%Y%m%d%H')}/DTR_Feature_Importance.png")
     fig2.savefig(f"{OUTPUT_PREFIX}/{now_utc.strftime('%Y%m%d%H')}/PDP_mileage_num.png")
     fig3.savefig(f"{OUTPUT_PREFIX}/{now_utc.strftime('%Y%m%d%H')}/PDP_year_num.png")
-    fig4.savefig(f"{OUTPUT_PREFIX}/{now_utc.strftime('%Y%m%d%H')}/PDP_cylinders.png")
+    fig4.savefig(f"{OUTPUT_PREFIX}/{now_utc.strftime('%Y%m%d%H')}/PDP_cylinders.png")'''
 
     if not dry_run and len(preds_df) > 0:
         _write_csv_to_gcs(client, GCS_BUCKET, out_key, preds_df)
