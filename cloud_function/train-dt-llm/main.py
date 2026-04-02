@@ -151,10 +151,9 @@ def run_once(dry_run: bool = False, max_depth: int = 12, min_samples_leaf: int =
                           labels=X_h[mask].columns[perm_sorted_idx])
                 fig.suptitle('DTR Feature Importance', y=1.05)
                 fig.tight_layout()
-                now_utc = pd.Timestamp.utcnow().tz_convert("UTC")
-                plt.savefig(f"{OUTPUT_PREFIX}/{now_utc.strftime('%Y%m%d%H')}/DTR_Feature_Importance.png")
                 plt.show()
                 from pycebox.ice import ice, ice_plot
+                plt.figure()
                 tmpdf = ice(data=train_df[feats],
                             column="mileage_num", 
                             predict=best_pipe.predict)
@@ -164,10 +163,10 @@ def run_once(dry_run: bool = False, max_depth: int = 12, min_samples_leaf: int =
                 plt.title("PDP: mileage_num")
                 plt.ylabel("Predicted Price")
                 plt.xlabel("mileage_num");
-                now_utc = pd.Timestamp.utcnow().tz_convert("UTC")
-                plt.savefig(f"{OUTPUT_PREFIX}/{now_utc.strftime('%Y%m%d%H')}/PDP_mileage_num.png")
+                fig2 = plt.gcf()
                 plt.show()  
 
+                plt.figure()
                 tmpdf = ice(data=train_df[feats],
                             column="year_num", 
                             predict=best_pipe.predict)
@@ -177,10 +176,11 @@ def run_once(dry_run: bool = False, max_depth: int = 12, min_samples_leaf: int =
                 plt.title("PDP: year_num")
                 plt.ylabel("Predicted Price")
                 plt.xlabel("year_num");
-                now_utc = pd.Timestamp.utcnow().tz_convert("UTC")
-                plt.savefig(f"{OUTPUT_PREFIX}/{now_utc.strftime('%Y%m%d%H')}/PDP_year_num.png")
+                
+                fig3 = plt.gcf() 
                 plt.show() 
 
+                plt.figure()
                 tmpdf = ice(data=train_df[feats],
                             column="cylinders", 
                             predict=best_pipe.predict)
@@ -190,12 +190,17 @@ def run_once(dry_run: bool = False, max_depth: int = 12, min_samples_leaf: int =
                 plt.title("PDP: cylinders")
                 plt.ylabel("Predicted Price")
                 plt.xlabel("cylinders");
-                plt.savefig(f"{OUTPUT_PREFIX}/{now_utc.strftime('%Y%m%d%H')}/PDP_cylinders.png")
+                
+                fig4 = plt.gcf()
                 plt.show()
 
     # --- Output path: HOURLY folder structure ---
     now_utc = pd.Timestamp.utcnow().tz_convert("UTC")
     out_key = f"{OUTPUT_PREFIX}/{now_utc.strftime('%Y%m%d%H')}/preds_llm.csv"
+    fig.savefig(f"{OUTPUT_PREFIX}/{now_utc.strftime('%Y%m%d%H')}/DTR_Feature_Importance.png")
+    fig2.savefig(f"{OUTPUT_PREFIX}/{now_utc.strftime('%Y%m%d%H')}/PDP_mileage_num.png")
+    fig3.savefig(f"{OUTPUT_PREFIX}/{now_utc.strftime('%Y%m%d%H')}/PDP_year_num.png")
+    fig4.savefig(f"{OUTPUT_PREFIX}/{now_utc.strftime('%Y%m%d%H')}/PDP_cylinders.png")
 
     if not dry_run and len(preds_df) > 0:
         _write_csv_to_gcs(client, GCS_BUCKET, out_key, preds_df)
