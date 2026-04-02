@@ -138,7 +138,7 @@ def run_once(dry_run: bool = False, max_depth: int = 12, min_samples_leaf: int =
             mask = y_true.notna()
             if mask.any():
                 mae_today = float(mean_absolute_error(y_true[mask], y_hat[mask]))
-                '''from sklearn.inspection import permutation_importance
+                from sklearn.inspection import permutation_importance
                 clf=best_pipe
                 result=permutation_importance(clf,X_h[mask],y_true[mask],n_repeats=10,random_state=42)
                 perm_sorted_idx = result.importances_mean.argsort()
@@ -152,7 +152,7 @@ def run_once(dry_run: bool = False, max_depth: int = 12, min_samples_leaf: int =
                 fig.suptitle('DTR Feature Importance', y=1.05)
                 fig.tight_layout()
                 plt.show()
-                from pycebox.ice import ice, ice_plot
+                '''from pycebox.ice import ice, ice_plot
                 plt.figure()
                 tmpdf = ice(data=train_df[feats],
                             column="mileage_num", 
