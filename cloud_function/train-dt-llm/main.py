@@ -151,6 +151,7 @@ def run_once(dry_run: bool = False, max_depth: int = 12, min_samples_leaf: int =
                           labels=X_h[mask].columns[perm_sorted_idx])
                 fig.suptitle('DTR Feature Importance', y=1.05)
                 fig.tight_layout()
+                now_utc = pd.Timestamp.utcnow().tz_convert("UTC")
                 plt.savefig(f"{OUTPUT_PREFIX}/{now_utc.strftime('%Y%m%d%H')}/DTR_Feature_Importance.png")
                 plt.show()
                 from pycebox.ice import ice, ice_plot
@@ -163,6 +164,7 @@ def run_once(dry_run: bool = False, max_depth: int = 12, min_samples_leaf: int =
                 plt.title("PDP: mileage_num")
                 plt.ylabel("Predicted Price")
                 plt.xlabel("mileage_num");
+                now_utc = pd.Timestamp.utcnow().tz_convert("UTC")
                 plt.savefig(f"{OUTPUT_PREFIX}/{now_utc.strftime('%Y%m%d%H')}/PDP_mileage_num.png")
                 plt.show()  
 
@@ -175,6 +177,7 @@ def run_once(dry_run: bool = False, max_depth: int = 12, min_samples_leaf: int =
                 plt.title("PDP: year_num")
                 plt.ylabel("Predicted Price")
                 plt.xlabel("year_num");
+                now_utc = pd.Timestamp.utcnow().tz_convert("UTC")
                 plt.savefig(f"{OUTPUT_PREFIX}/{now_utc.strftime('%Y%m%d%H')}/PDP_year_num.png")
                 plt.show() 
 
