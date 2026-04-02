@@ -203,16 +203,31 @@ def run_once(dry_run: bool = False, max_depth: int = 12, min_samples_leaf: int =
                 plt.show()
 
     # --- Output path: HOURLY folder structure ---
+    def _write_fig_to_gcs(client, bucket, key, fig):
+        b = client.bucket(bucket)
+        blob = b.blob(key)
+
+        buf = io.BytesIO()
+        fig.savefig(buf, format="png", bbox_inches="tight")
+        buf.seek(0)
+
+        blob.upload_from_file(buf, content_type="image/png")
     now_utc = pd.Timestamp.utcnow().tz_convert("UTC")
     out_key = f"{OUTPUT_PREFIX}/{now_utc.strftime('%Y%m%d%H')}/preds_llm.csv"
-    '''fig.savefig(f"{OUTPUT_PREFIX}/{now_utc.strftime('%Y%m%d%H')}/DTR_Feature_Importance.png")
-    fig2.savefig(f"{OUTPUT_PREFIX}/{now_utc.strftime('%Y%m%d%H')}/PDP_mileage_num.png")
-    fig3.savefig(f"{OUTPUT_PREFIX}/{now_utc.strftime('%Y%m%d%H')}/PDP_year_num.png")
-    fig4.savefig(f"{OUTPUT_PREFIX}/{now_utc.strftime('%Y%m%d%H')}/PDP_cylinders.png")'''
+    fig1_key = f"{OUTPUT_PREFIX}/{now_utc.strftime('%Y%m%d%H')}/DTR_Feature_Importance.png"
+    fig2_key = f"{OUTPUT_PREFIX}/{now_utc.strftime('%Y%m%d%H')}/PDP_mileage_num.png"
+    fig3_key = f"{OUTPUT_PREFIX}/{now_utc.strftime('%Y%m%d%H')}/PDP_year_num.png"
+    fig4_key = f"{OUTPUT_PREFIX}/{now_utc.strftime('%Y%m%d%H')}/PDP_cylinders.png"
 
     if not dry_run and len(preds_df) > 0:
         _write_csv_to_gcs(client, GCS_BUCKET, out_key, preds_df)
         logging.info("Wrote predictions to gs://%s/%s (%d rows)", GCS_BUCKET, out_key, len(preds_df))
+
+        _write_fig_to_gcs(client, GCS_BUCKET, fig1_key, fig)
+        _write_fig_to_gcs(client, GCS_BUCKET, fig2_key, fig2)
+        _write_fig_to_gcs(client, GCS_BUCKET, fig3_key, fig3)
+        _write_fig_to_gcs(client, GCS_BUCKET, fig4_key, fig4)
+        logging.info("Saved plots to gs://%s/%s", GCS_BUCKET, fig1_key,fig2_key,fig3_key,fig4_key)
     else:
         logging.info("Dry run or no holdout rows; skip write. Would write to gs://%s/%s", GCS_BUCKET, out_key)
 
