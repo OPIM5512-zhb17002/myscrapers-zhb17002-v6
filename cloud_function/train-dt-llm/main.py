@@ -157,6 +157,9 @@ def run_once(dry_run: bool = False, max_depth: int = 12, min_samples_leaf: int =
                 tmpdf = ice(data=train_df[feats],
                             column="mileage_num", 
                             predict=best_pipe.predict)
+                print(type(train_df))
+                print(type(train_df[feats]))
+                print(train_df[feats].columns)
                 ice_plot(tmpdf, c="dimgray", linewidth=0.3,
                             plot_pdp=True,
                 pdp_kwargs={"linewidth": 5, "color":"red"})
