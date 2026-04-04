@@ -84,7 +84,7 @@ def run_once(dry_run: bool = False, max_depth: int = 12, min_samples_leaf: int =
     logging.info("Train rows after target clean: %d (dropped_for_target=%d)", len(train_df), dropped_for_target)
     logging.info("Holdout rows today (%s): %d", today_local, len(holdout_df))
 
-    if len(train_df) < 20:
+    if len(train_df) < 40:
         return {"status": "noop", "reason": "too few training rows", "train_rows": int(len(train_df))}
 
     # --- Model: make, model, year_num, mileage_num -> price_num ---
