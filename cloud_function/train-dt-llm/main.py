@@ -12,6 +12,10 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
 from sklearn.impute import SimpleImputer
 from sklearn.tree import DecisionTreeRegressor
+from sklearn.model_selection import KFold
+from sklearn.model_selection import GridSearchCV
+from sklearn.inspection import permutation_importance
+from pycebox.ice import ice, ice_plot
 from sklearn.metrics import mean_absolute_error
 
 # ---- ENV ----
@@ -94,8 +98,6 @@ def run_once(dry_run: bool = False, max_depth: int = 12, min_samples_leaf: int =
     num_cols = ["year_num", "mileage_num","cylinders"]
     feats = cat_cols + num_cols
 
-    from sklearn.model_selection import KFold
-    from sklearn.model_selection import GridSearchCV
     pre = ColumnTransformer(
         transformers=[
             ("num",  Pipeline([
@@ -138,7 +140,7 @@ def run_once(dry_run: bool = False, max_depth: int = 12, min_samples_leaf: int =
             mask = y_true.notna()
             if mask.any():
                 mae_today = float(mean_absolute_error(y_true[mask], y_hat[mask]))
-                from sklearn.inspection import permutation_importance
+                
                 clf=best_pipe
                 result=permutation_importance(clf,X_h[mask],y_true[mask],n_repeats=10,random_state=42)
                 perm_sorted_idx = result.importances_mean.argsort()
@@ -157,7 +159,7 @@ def run_once(dry_run: bool = False, max_depth: int = 12, min_samples_leaf: int =
                     x_df = pd.DataFrame(x, columns=feats)
                     return best_pipe.predict(x_df)
                 
-                from pycebox.ice import ice, ice_plot
+                
                 plt.figure()
                 tmpdf = ice(data=train_df[feats],
                             column="mileage_num", 
